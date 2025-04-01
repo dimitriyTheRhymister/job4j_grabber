@@ -3,11 +3,11 @@ package ru.job4j.grabber.model;
 import java.util.Objects;
 
 public class Post {
-    private Long id;           // уникальный идентификатор вакансии
-    private String title;      // название вакансии
-    private String link;       // ссылка на страницу с вакансией
-    private String description; // описание вакансии
-    private Long time;            // дата и время публикации вакансии
+    private Long id;
+    private String title;
+    private String link;
+    private String description;
+    private Long time;
 
     public Post(Long id, String title, String link, String description, Long time) {
         this.id = id;
