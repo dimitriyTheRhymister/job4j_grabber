@@ -25,7 +25,7 @@ public class JdbcStore implements Store {
             pS.setString(2, post.getLink());
             pS.setString(3, post.getDescription());
             pS.setLong(4, post.getTime());
-            pS.executeUpdate(); // Выполняем запрос
+            pS.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -45,11 +45,11 @@ public class JdbcStore implements Store {
     }
 
     private Post createPostFromResultSet(ResultSet rs) throws SQLException {
-        long id = rs.getLong("id"); // Используем getLong для id
+        long id = rs.getLong("id");
         String title = rs.getString("title");
         String link = rs.getString("link");
         String description = rs.getString("description");
-        long time = rs.getLong("time"); // Используем getLong для time
+        long time = rs.getLong("time");
         return new Post(id, title, link, description, time);
     }
 
@@ -65,6 +65,6 @@ public class JdbcStore implements Store {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        return Optional.empty(); // Если не найдено
+        return Optional.empty();
     }
 }
