@@ -26,31 +26,60 @@ public class HabrCareerParse implements Parse {
                 var connection = Jsoup.connect(fullLink);
                 var document = connection.get();
                 var rows = document.select(".vacancy-card__inner");
+
                 rows.forEach(row -> {
                     var titleElement = row.select(".vacancy-card__title").first();
-                    assert titleElement != null;
-                    var linkElement = titleElement.child(0);
-                    String vacancyName = titleElement.text();
-                    String link = String.format("%s%s", SOURCE_LINK,
-                            linkElement.attr("href"));
+                    if (titleElement != null) {
+                        var linkElement = titleElement.child(0);
+                        String vacancyName = titleElement.text();
+                        String link = String.format("%s%s", SOURCE_LINK, linkElement.attr("href"));
 
-                    var dateElement = row.select(".vacancy-card__date").first();
-                    assert dateElement != null;
-                    var date = dateElement.child(0);
-                    String dateString = date.attr("datetime");
-                    ZonedDateTime zonedDateTime = ZonedDateTime.parse(dateString, DateTimeFormatter.ISO_ZONED_DATE_TIME);
-                    long time = zonedDateTime.toInstant().toEpochMilli();
+                        var dateElement = row.select(".vacancy-card__date").first();
+                        if (dateElement != null) {
+                            var date = dateElement.child(0);
+                            String dateString = date.attr("datetime");
+                            ZonedDateTime zonedDateTime = ZonedDateTime.parse(dateString, DateTimeFormatter.ISO_ZONED_DATE_TIME);
+                            long time = zonedDateTime.toInstant().toEpochMilli();
 
-                    var post = new Post();
-                    post.setTitle(vacancyName);
-                    post.setLink(link);
-                    post.setTime(time);
-                    result.add(post);
+                            String description;
+                            try {
+                                description = retrieveDescription(link);
+                            } catch (IOException e) {
+                                LOGGER.warn("Failed to retrieve description for link: " + link, e);
+                                description = "Description not available";
+                            }
+
+                            var post = new Post();
+                            post.setTitle(vacancyName);
+                            post.setLink(link);
+                            post.setDescription(description);
+                            post.setTime(time);
+                            result.add(post);
+                        } else {
+                            LOGGER.warn("Date element not found for vacancy: " + vacancyName);
+                        }
+                    } else {
+                        LOGGER.warn("Title element not found in row: " + row);
+                    }
                 });
             }
         } catch (IOException e) {
-            LOGGER.error("When load page", e);
+            LOGGER.error("Error loading page", e);
         }
         return result;
+    }
+
+    private String retrieveDescription(String link) throws IOException {
+        var connection = Jsoup.connect(link);
+        var document = connection.get();
+        var rows = document.select(".vacancy-description__text");
+
+        return rows.text();
+    }
+
+    public static void main(String[] args) {
+        HabrCareerParse habrCareerParse = new HabrCareerParse();
+        List<Post> list = habrCareerParse.fetch();
+        System.out.println(list);
     }
 }
