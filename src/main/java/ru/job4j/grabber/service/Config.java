@@ -14,12 +14,21 @@ public class Config {
     public void load(String file) {
         try (var input = new BufferedReader(new FileReader(file))) {
             properties.load(input);
+            LOGGER.info("2-в проперти загрузили ok");
+
         } catch (IOException io) {
             LOGGER.error(String.format("When load file : %s", file), io);
         }
     }
 
     public String get(String key) {
+        LOGGER.info("4,5,6-получили 1 из 3-х ok");
         return properties.getProperty(key);
+    }
+
+    public static void main(String[] args) {
+        Config config = new Config();
+        config.load("src/main/resources/config.properties");
+        System.out.println(config.get("parser.interval"));
     }
 }

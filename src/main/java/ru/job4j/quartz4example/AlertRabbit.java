@@ -1,4 +1,4 @@
-package ru.job4j.quartz;
+package ru.job4j.quartz4example;
 
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
@@ -16,7 +16,10 @@ public class AlertRabbit {
     public static class Rabbit implements Job {
         @Override
         public void execute(JobExecutionContext context) {
-            System.out.println("Rabbit runs here ...");
+            String param1 = context.getJobDetail().getJobDataMap().getString("param1");
+            int param2 = context.getJobDetail().getJobDataMap().getInt("param2");
+
+            System.out.println("Rabbit runs here with param1: " + param1 + " and param2: " + param2);
         }
     }
 
@@ -36,11 +39,15 @@ public class AlertRabbit {
             Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
             scheduler.start();
 
-            JobDetail job = newJob(Rabbit.class).build();
+            JobDetail job = newJob(Rabbit.class)
+                    .usingJobData("param1", "Hello, Rabbit!")
+                    .usingJobData("param2", 42)
+                    .build();
 
             Properties config = getConfig();
             String str = config.getProperty("rabbit.interval");
             int interval = Integer.parseInt(str);
+
             SimpleScheduleBuilder times = simpleSchedule()
                     .withIntervalInSeconds(interval)
                     .repeatForever();
@@ -49,6 +56,7 @@ public class AlertRabbit {
                     .startNow()
                     .withSchedule(times)
                     .build();
+
             scheduler.scheduleJob(job, trigger);
         } catch (SchedulerException se) {
             se.printStackTrace();

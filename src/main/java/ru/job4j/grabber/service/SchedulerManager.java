@@ -16,6 +16,8 @@ public class SchedulerManager {
         try {
             scheduler = StdSchedulerFactory.getDefaultScheduler();
             scheduler.start();
+            LOGGER.info("10-scheduler стартовал ok");
+
         } catch (SchedulerException se) {
             LOGGER.error("When init scheduler", se);
         }
@@ -28,17 +30,22 @@ public class SchedulerManager {
             var job = newJob(task)
                     .usingJobData(data)
                     .build();
+            LOGGER.info("12-newJob построили ok");
+
             SimpleScheduleBuilder times = simpleSchedule()
                     .withIntervalInSeconds(period)
                     .repeatForever();
+            LOGGER.info("13-simpleSchedule создали ok");
 
             Trigger trigger = newTrigger()
                     .startNow()
                     .withSchedule(times)
                     .build();
+            LOGGER.info("14-trigger создали ok");
 
             scheduler.scheduleJob(job, trigger);
-        } catch (SchedulerException se) {
+            LOGGER.info("15-в scheduleJob дали job и trigger=start работе ok");
+         } catch (SchedulerException se) {
             LOGGER.error("When init job", se);
         }
     }

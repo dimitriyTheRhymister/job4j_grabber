@@ -20,7 +20,7 @@ public class JdbcStore implements Store {
     @Override
     public void save(Post post) {
         try (PreparedStatement pS = connection.prepareStatement(
-                "INSERT INTO items(title, link, description, time) VALUES (?, ?, ?, ?)")) {
+                "INSERT INTO post(title, link, description, time) VALUES (?, ?, ?, ?)")) {
             pS.setString(1, post.getTitle());
             pS.setString(2, post.getLink());
             pS.setString(3, post.getDescription());
@@ -40,6 +40,7 @@ public class JdbcStore implements Store {
             while (rS.next()) {
                 posts.add(createPostFromResultSet(rS));
             }
+            System.out.println("Количество записей в БД: " + posts.size()); // Отладочный вывод
             return posts;
         }
     }

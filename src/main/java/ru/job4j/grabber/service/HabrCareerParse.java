@@ -27,6 +27,8 @@ public class HabrCareerParse implements Parse {
                 var document = connection.get();
                 var rows = document.select(".vacancy-card__inner");
 
+                System.out.println("Processing page: " + pageNumber); // Добавьте это......................................my
+
                 rows.forEach(row -> {
                     var titleElement = row.select(".vacancy-card__title").first();
                     if (titleElement != null) {
@@ -80,6 +82,6 @@ public class HabrCareerParse implements Parse {
     public static void main(String[] args) {
         HabrCareerParse habrCareerParse = new HabrCareerParse();
         List<Post> list = habrCareerParse.fetch();
-        System.out.println(list);
+        System.out.println("Fetched posts: " + list.size()); // Проверка количества извлеченных вакансий
     }
 }

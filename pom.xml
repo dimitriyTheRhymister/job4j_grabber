@@ -18,6 +18,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>io.javalin</groupId>
+            <artifactId>javalin</artifactId>
+            <version>5.0.0</version> <!-- Замените на актуальную версию -->
+        </dependency>
+        <dependency>
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
             <version>1.17.2</version>
