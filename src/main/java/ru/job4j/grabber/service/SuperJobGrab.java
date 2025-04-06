@@ -19,12 +19,12 @@ public class SuperJobGrab implements Job {
         HabrCareerParse parser = new HabrCareerParse(habrCareerDateTimeParser);
         LOGGER.info("parser создан ok");
 
-        List<Post> posts = parser.fetch(HabrCareerParse.SOURCE_LINK); // получаем вакансии
+        List<Post> posts = parser.fetch(HabrCareerParse.SOURCE_LINK);
         LOGGER.info("Fetched posts: " + posts.size());
 
         for (Post post : posts) {
-            store.save(post); // сохраняем каждую вакансию в базе данных
-            System.out.println("Saved post: " + post.getTitle()); // выводим заголовок вакансии в консоль
+            store.save(post);
+            System.out.println("Saved post: " + post.getTitle());
         }
     }
 }

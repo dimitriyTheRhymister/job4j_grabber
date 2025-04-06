@@ -33,7 +33,7 @@ public class HabrCareerParse implements Parse {
                 var document = connection.get();
                 var rows = document.select(".vacancy-card__inner");
 
-                System.out.println("Processing page: " + pageNumber); // парсим страницу.............................my
+                System.out.println("Processing page: " + pageNumber);
 
                 rows.forEach(row -> {
                     var titleElement = row.select(".vacancy-card__title").first();
@@ -89,6 +89,6 @@ public class HabrCareerParse implements Parse {
         HabrCareerDateTimeParser habrCareerDateTimeParser = new HabrCareerDateTimeParser();
         HabrCareerParse habrCareerParse = new HabrCareerParse(habrCareerDateTimeParser);
         List<Post> list = habrCareerParse.fetch(SOURCE_LINK);
-        System.out.println("Fetched posts: " + list.size()); // количества извлеченных вакансий
+        System.out.println("Fetched posts: " + list.size());
     }
 }
