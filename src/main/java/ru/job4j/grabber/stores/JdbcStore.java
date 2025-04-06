@@ -40,7 +40,7 @@ public class JdbcStore implements Store {
             while (rS.next()) {
                 posts.add(createPostFromResultSet(rS));
             }
-            System.out.println("Количество записей в БД: " + posts.size()); // Отладочный вывод
+            System.out.println("Количество записей в БД: " + posts.size());
             return posts;
         }
     }
