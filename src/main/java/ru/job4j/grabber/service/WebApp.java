@@ -87,7 +87,11 @@ public class WebApp {
                         .append("</a>")
                         .append(" - ")
                         .append(convertMillisToLocalDateTime(job.getTime()))
-                        .append("</li>");
+                        .append("</li>")
+                        .append("<br>")
+                        .append(job.getDescription())
+                        .append("<br>")
+                        .append("<br>");
             }
 
             html.append("</ol>")
