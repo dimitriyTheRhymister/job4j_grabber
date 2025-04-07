@@ -4,23 +4,17 @@ import io.javalin.Javalin;
 import org.apache.log4j.Logger;
 import ru.job4j.grabber.stores.JdbcStore;
 import ru.job4j.grabber.stores.Store;
+import ru.job4j.grabber.utils.HabrCareerDateTimeParser;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 
 public class WebApp {
     private static final Logger LOGGER = Logger.getLogger(WebApp.class);
 
-    private static LocalDateTime convertMillisToLocalDateTime(long millis) {
-        Instant instant = Instant.ofEpochMilli(millis);
-        return LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
-    }
-
     public static void main(String[] args) throws SQLException {
+        HabrCareerDateTimeParser habrCareerDateTimeParser = new HabrCareerDateTimeParser();
         var config = new Config();
         config.load("src/main/resources/config.properties");
         String url = config.get("db.url");
@@ -86,7 +80,7 @@ public class WebApp {
                         .append(job.getLink())
                         .append("</a>")
                         .append(" - ")
-                        .append(convertMillisToLocalDateTime(job.getTime()))
+                        .append(habrCareerDateTimeParser.convertMillisToLocalDateTime(job.getTime()))
                         .append("</li>")
                         .append("<br>")
                         .append(job.getDescription())

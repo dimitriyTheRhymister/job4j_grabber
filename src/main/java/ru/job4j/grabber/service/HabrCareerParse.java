@@ -2,14 +2,14 @@ package ru.job4j.grabber.service;
 
 import org.apache.log4j.Logger;
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Element;
 import ru.job4j.grabber.model.Post;
 import ru.job4j.grabber.utils.HabrCareerDateTimeParser;
 
 import java.io.IOException;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class HabrCareerParse implements Parse {
     private static final Logger LOGGER = Logger.getLogger(HabrCareerParse.class);
@@ -17,78 +17,76 @@ public class HabrCareerParse implements Parse {
     private static final String PREFIX = "/vacancies?page=";
     private static final String SUFFIX = "&q=Java%20developer&type=all";
     private static final int PAGES_TO_PARSE = 5;
-    private final HabrCareerDateTimeParser habrCareerDateTimeParser;
-
-    public HabrCareerParse(HabrCareerDateTimeParser habrCareerDateTimeParser) {
-        this.habrCareerDateTimeParser = habrCareerDateTimeParser;
-    }
+    private final HabrCareerDateTimeParser habrCareerDateTimeParser = new HabrCareerDateTimeParser();
 
     @Override
-    public List<Post> fetch(String sourceLink) {
-        var result = new ArrayList<Post>();
+    public List<Post> fetch() {
+        List<Post> result = new ArrayList<>();
         try {
             for (int pageNumber = 1; pageNumber <= PAGES_TO_PARSE; pageNumber++) {
-                String fullLink = "%s%s%d%s".formatted(sourceLink, PREFIX, pageNumber, SUFFIX);
-                var connection = Jsoup.connect(fullLink);
-                var document = connection.get();
-                var rows = document.select(".vacancy-card__inner");
-
-                System.out.println("Processing page: " + pageNumber);
-
-                rows.forEach(row -> {
-                    var titleElement = row.select(".vacancy-card__title").first();
-                    if (titleElement != null) {
-                        var linkElement = titleElement.child(0);
-                        String vacancyName = titleElement.text();
-                        String link = String.format("%s%s", SOURCE_LINK, linkElement.attr("href"));
-
-                        var dateElement = row.select(".vacancy-card__date").first();
-                        if (dateElement != null) {
-                            var date = dateElement.child(0);
-                            String dateString = date.attr("datetime");
-                            ZonedDateTime zonedDateTime = ZonedDateTime.parse(dateString, DateTimeFormatter.ISO_ZONED_DATE_TIME);
-                            long time = zonedDateTime.toInstant().toEpochMilli();
-
-                            String description;
-                            try {
-                                description = retrieveDescription(link);
-                            } catch (IOException e) {
-                                LOGGER.warn("Failed to retrieve description for link: " + link, e);
-                                description = "Description not available";
-                            }
-
-                            var post = new Post();
-                            post.setTitle(vacancyName);
-                            post.setLink(link);
-                            post.setDescription(description);
-                            post.setTime(time);
-                            result.add(post);
-                        } else {
-                            LOGGER.warn("Date element not found for vacancy: " + vacancyName);
-                        }
-                    } else {
-                        LOGGER.warn("Title element not found in row: " + row);
-                    }
-                });
+                String fullLink = String.format("%s%s%d%s", SOURCE_LINK, PREFIX, pageNumber, SUFFIX);
+                processPage(fullLink, result);
             }
         } catch (IOException e) {
-            LOGGER.error("Error loading page", e);
+            LOGGER.error("Error loading pages", e);
         }
         return result;
     }
 
-    private String retrieveDescription(String link) throws IOException {
-        var connection = Jsoup.connect(link);
-        var document = connection.get();
-        var rows = document.select(".vacancy-description__text");
+    private void processPage(String fullLink, List<Post> result) throws IOException {
+        var document = Jsoup.connect(fullLink).get();
+        var rows = document.select(".vacancy-card__inner");
 
-        return rows.text();
+        System.out.println("Processing page: " + fullLink);
+
+        rows.forEach(row -> {
+            Optional<Post> post = createPostFromRow(row);
+            post.ifPresent(result::add);
+        });
     }
 
-    public static void main(String[] args) {
-        HabrCareerDateTimeParser habrCareerDateTimeParser = new HabrCareerDateTimeParser();
-        HabrCareerParse habrCareerParse = new HabrCareerParse(habrCareerDateTimeParser);
-        List<Post> list = habrCareerParse.fetch(SOURCE_LINK);
-        System.out.println("Fetched posts: " + list.size());
+    private Optional<Post> createPostFromRow(Element row) {
+        var titleElement = row.select(".vacancy-card__title").first();
+        if (titleElement == null) {
+            LOGGER.warn("Title element not found in row: " + row);
+            return Optional.empty();
+        }
+
+        var linkElement = titleElement.child(0);
+        String vacancyName = titleElement.text();
+        String link = String.format("%s%s", SOURCE_LINK, linkElement.attr("href"));
+        var dateElement = row.select(".vacancy-card__date").first();
+
+        if (dateElement == null) {
+            LOGGER.warn("Date element not found for vacancy: " + vacancyName);
+            return Optional.empty();
+        }
+
+        var date = dateElement.child(0);
+        String dateString = date.attr("datetime");
+        long time = habrCareerDateTimeParser.convertStringToMillis(dateString);
+
+        String description = retrieveDescription(link)
+                .orElse("Description not available");
+
+        Post post = new Post();
+        post.setTitle(vacancyName);
+        post.setLink(link);
+        post.setDescription(description);
+        post.setTime(time);
+
+        return Optional.of(post);
+    }
+
+    private Optional<String> retrieveDescription(String link) {
+        try {
+            var connection = Jsoup.connect(link);
+            var document = connection.get();
+            var rows = document.select(".vacancy-description__text");
+            return Optional.of(rows.text());
+        } catch (IOException e) {
+            LOGGER.warn("Failed to retrieve description for link: " + link, e);
+            return Optional.empty();
+        }
     }
 }

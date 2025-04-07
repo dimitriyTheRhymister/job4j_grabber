@@ -12,7 +12,7 @@ class HabrCareerDateTimeParserTest {
     void whenParseOutputStringCorrect() {
         String input = "2025-03-28T10:28:02+03:00";
         HabrCareerDateTimeParser habrCareerDateTimeParser = new HabrCareerDateTimeParser();
-        LocalDateTime output = habrCareerDateTimeParser.parse(input);
+        LocalDateTime output = habrCareerDateTimeParser.convertStringToLocalDateTime(input);
         String expected = output.toString();
         assertThat(output).isEqualTo(expected);
     }
@@ -21,7 +21,7 @@ class HabrCareerDateTimeParserTest {
     void whenParseOutputClassCorrect() {
         String input = "2025-03-28T10:28:02+03:00";
         HabrCareerDateTimeParser habrCareerDateTimeParser = new HabrCareerDateTimeParser();
-        LocalDateTime output = habrCareerDateTimeParser.parse(input);
+        LocalDateTime output = habrCareerDateTimeParser.convertStringToLocalDateTime(input);
         Class<?> cls = output.getClass();
         String expected = "LocalDateTime";
         assertThat(cls.getSimpleName()).isEqualTo(expected);
