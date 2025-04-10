@@ -10,6 +10,9 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
+import java.awt.Desktop;
+import java.net.URI;
+
 public class WebApp {
     private static final Logger LOGGER = Logger.getLogger(WebApp.class);
 
@@ -94,5 +97,18 @@ public class WebApp {
 
             ctx.html(html.toString());
         });
+
+        String url2 = "http://localhost:7000/jobs";
+        openWebPage(url2);
+    }
+
+    private static void openWebPage(String urlString) {
+        try {
+            URI uri = new URI(urlString);
+            Desktop desktop = Desktop.getDesktop();
+            desktop.browse(uri);
+        } catch (Exception e) {
+            LOGGER.error("Произошла ошибка", e);
+        }
     }
 }
